@@ -1,0 +1,42 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Secure Password Manager TDD Project
+
+This project implements a secure password manager using Security-focused Test-Driven Development (S-TDD). The application allows users to:
+
+1. Store credentials (username/password) for different services
+2. Retrieve stored passwords
+3. Delete credentials
+4. List all stored services
+
+## Project Structure
+- Main implementation: [src/gestor_credenciales/gestor_credenciales.py](mdc:src/gestor_credenciales/gestor_credenciales.py)
+- Security tests: [tests/gestor_credenciales/test_seguridad_gestor_credenciales.py](mdc:tests/gestor_credenciales/test_seguridad_gestor_credenciales.py)
+- Functional tests: [tests/gestor_credenciales/test_funcionales_gestor_credenciales.py](mdc:tests/gestor_credenciales/test_funcionales_gestor_credenciales.py)
+
+## Assignment Summary and S-TDD Process
+- Follow S-TDD: Write functional and security tests first, then implement code to pass them, then refactor (using SonarQube for quality/security).
+- Functional requirements: Add, retrieve, delete credentials; list all services.
+- Security requirements: Passwords must be encrypted, password policy enforced, master password authentication, input validation, audit logging (without sensitive data), and protection against injection attacks.
+- Use Design-By-Contract (e.g., icontract) for pre/postconditions.
+- Use unittest for tests.
+- Add at least 6 new security tests beyond those provided.
+- Document design/security decisions and individual contributions in the team report ([Informe_Equipo_Tidelock.md](mdc:Informe_Equipo_Tidelock.md)), using the template in [enunciado.md](mdc:enunciado.md).
+
+## Security Requirements
+- Password policy enforcement (min length, complexity requirements)
+- Protection against SQL injection and command injection
+- Secure storage of passwords (not in plaintext)
+- Authentication with master password
+- Input validation and sanitization
+
+The goal is to develop a secure application by focusing on security requirements from the beginning of the development process, rather than adding security as an afterthought.
+
+## Project Deliverables
+- Team Report: The [Informe_Equipo_Tidelock.md](mdc:Informe_Equipo_Tidelock.md) file needs to be completed based on the template provided in [enunciado.md](mdc:enunciado.md). This report should document the team's approach, tools used, individual contributions, teamwork evaluation, and reflections on the S-TDD methodology.
+
+
+
