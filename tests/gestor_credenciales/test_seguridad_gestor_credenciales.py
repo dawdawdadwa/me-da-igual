@@ -1,5 +1,10 @@
 import unittest
-from src.gestor_credenciales.gestor_credenciales import GestorCredenciales, ErrorPoliticaPassword, ErrorAutenticacion, ErrorServicioNoEncontrado, ErrorCredencialExistente
+from src.gestor_credenciales.gestor_credenciales import (
+    GestorCredenciales, ErrorPoliticaPassword, ErrorAutenticacion,
+    ErrorServicioNoEncontrado, ErrorCredencialExistente, ErrorBloqueoUsuario,
+    AutenticadorBcrypt, PoliticaPasswordEstandar, AlmacenamientoEnMemoria,
+    CifradorBcrypt, RegistroAuditoria, GestorPermisos, ValidadorEntrada
+)
 from hypothesis import given, settings
 from hypothesis.strategies import text
 
@@ -7,7 +12,31 @@ from hypothesis.strategies import text
 class TestSeguridadGestorCredenciales(unittest.TestCase):
     def setUp(self):
         self.master_password = "ClaveMaestraSegura123!"
-        self.gestor = GestorCredenciales(self.master_password)
+
+        # Instanciar estrategias base para cada test
+        self.autenticador_base = AutenticadorBcrypt(self.master_password)
+        self.politica_password_base = PoliticaPasswordEstandar()
+        self.almacenamiento_base = AlmacenamientoEnMemoria()
+        self.cifrador_base = CifradorBcrypt()
+        self.registro_auditoria_base = RegistroAuditoria()
+        self.gestor_permisos_base = GestorPermisos()
+
+        # Desactivar características avanzadas por defecto para la mayoría de los tests
+        self.autenticador_base.activar_bloqueo(False)
+        self.politica_password_base.activar_verificacion_patrones(False)
+        self.registro_auditoria_base.activar_registro_detallado(False)
+        self.gestor_permisos_base.activar_verificacion(False)
+        ValidadorEntrada.activar_validacion_estricta(False)
+
+        self.gestor = GestorCredenciales(
+            autenticador=self.autenticador_base,
+            politica_password=self.politica_password_base,
+            almacenamiento=self.almacenamiento_base,
+            cifrador=self.cifrador_base,
+            registro_auditoria=self.registro_auditoria_base,
+            gestor_permisos=self.gestor_permisos_base,
+            clave_maestra_para_hash_compatibilidad=self.master_password
+        )
         self.servicio = "GitHub"
         self.usuario = "user1"
         self.password = "PasswordSegura123!"
@@ -59,7 +88,30 @@ class TestSeguridadGestorCredenciales(unittest.TestCase):
 
         # Re-initialize the gestor for each fuzz call to ensure a clean state.
         # This is a robust way to prevent state leakage between Hypothesis examples.
-        current_gestor = GestorCredenciales(self.master_password)
+        # Crear nuevas instancias de estrategias para este test específico
+        autenticador_fuzz = AutenticadorBcrypt(self.master_password)
+        politica_fuzz = PoliticaPasswordEstandar()
+        almacenamiento_fuzz = AlmacenamientoEnMemoria()
+        cifrador_fuzz = CifradorBcrypt()
+        registro_fuzz = RegistroAuditoria()
+        gestor_permisos_fuzz = GestorPermisos()
+
+        # Desactivar características avanzadas para este test específico
+        autenticador_fuzz.activar_bloqueo(False)
+        politica_fuzz.activar_verificacion_patrones(False)  # Queremos probar la política base sin bloqueo de patrones
+        registro_fuzz.activar_registro_detallado(False)
+        gestor_permisos_fuzz.activar_verificacion(False)
+        ValidadorEntrada.activar_validacion_estricta(False)
+
+        current_gestor = GestorCredenciales(
+            autenticador=autenticador_fuzz,
+            politica_password=politica_fuzz,
+            almacenamiento=almacenamiento_fuzz,
+            cifrador=cifrador_fuzz,
+            registro_auditoria=registro_fuzz,
+            gestor_permisos=gestor_permisos_fuzz,
+            clave_maestra_para_hash_compatibilidad=self.master_password
+        )
 
         try:
             current_gestor.añadir_credencial(self.master_password, servicio_unico, self.usuario, contrasena_generada)

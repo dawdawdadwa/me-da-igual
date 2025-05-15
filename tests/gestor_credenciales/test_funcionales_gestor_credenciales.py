@@ -1,11 +1,44 @@
 import unittest
-from src.gestor_credenciales.gestor_credenciales import GestorCredenciales, ErrorPoliticaPassword, ErrorAutenticacion, ErrorServicioNoEncontrado, ErrorCredencialExistente
+from src.gestor_credenciales.gestor_credenciales import (
+    GestorCredenciales, ErrorPoliticaPassword, ErrorAutenticacion,
+    ErrorServicioNoEncontrado, ErrorCredencialExistente,
+    AutenticadorBcrypt, PoliticaPasswordEstandar, AlmacenamientoEnMemoria,
+    CifradorBcrypt, RegistroAuditoria, GestorPermisos
+)
 
 
 class TestFuncionalesGestorCredenciales(unittest.TestCase):
     def setUp(self):
         self.master_password = "ClaveMaestraSegura123!"
-        self.gestor = GestorCredenciales(self.master_password)
+
+        # Instanciar estrategias
+        self.autenticador = AutenticadorBcrypt(self.master_password)
+        self.politica_password = PoliticaPasswordEstandar()
+        self.almacenamiento = AlmacenamientoEnMemoria()
+        self.cifrador = CifradorBcrypt()
+        self.registro_auditoria = RegistroAuditoria()
+        self.gestor_permisos = GestorPermisos()
+
+        # Configurar estrategias para compatibilidad con tests (desactivar características avanzadas)
+        self.autenticador.activar_bloqueo(False)
+        self.politica_password.activar_verificacion_patrones(False)
+        self.registro_auditoria.activar_registro_detallado(False)
+        self.gestor_permisos.activar_verificacion(False)
+        # src.gestor_credenciales.gestor_credenciales.ValidadorEntrada.activar_validacion_estricta(False)
+        # ^ Esta línea debe importarse correctamente o accederse como ValidadorEntrada.activar_validacion_estricta(False)
+        # si ValidadorEntrada es importado directamente
+        from src.gestor_credenciales.gestor_credenciales import ValidadorEntrada
+        ValidadorEntrada.activar_validacion_estricta(False)
+
+        self.gestor = GestorCredenciales(
+            autenticador=self.autenticador,
+            politica_password=self.politica_password,
+            almacenamiento=self.almacenamiento,
+            cifrador=self.cifrador,
+            registro_auditoria=self.registro_auditoria,
+            gestor_permisos=self.gestor_permisos,
+            clave_maestra_para_hash_compatibilidad=self.master_password
+        )
         self.servicio = "GitHub"
         self.usuario = "user1"
         self.password = "PasswordSegura123!"
